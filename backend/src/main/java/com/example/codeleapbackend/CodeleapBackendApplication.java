@@ -1,0 +1,11 @@
+package com.example.codeleapbackend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CodeleapBackendApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(CodeleapBackendApplication.class, args);
+    }
+}
