@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 创建一个Axios实例，统一管理所有请求配置
 const request = axios.create({
-  baseURL: 'http://localhost:8080', // 后端接口的基础地址，后续后端部署后只改这里
+  baseURL: 'http://10.224.183.107:8080', // 后端接口的基础地址，后续后端部署后只改这里
   timeout: 5000 // 请求超时时间：5秒，防止请求一直挂起
 })
 

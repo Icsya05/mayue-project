@@ -21,11 +21,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import request from '../../utils/request'
+import request from '../../utils/request' // 导入我们封装的Axios
 
-const router = useRouter()
+const router = useRouter() // 获取路由实例，用来跳转页面
 
-// 响应式数据：绑定表单输入
+// 定义用户对象，用来绑定表单输入
 const user = ref({
   username: '',
   password: ''
@@ -33,19 +33,19 @@ const user = ref({
 
 // 登录方法
 const login = async () => {
-  // 等后端接口写完后，取消下面的注释
-  // const res = await request.post('/user/login', user.value)
-  // if (res.code === 200) {
-  //   // 登录成功，将用户信息保存到本地存储
-  //   localStorage.setItem('user', JSON.stringify(res.data))
-  //   router.push('/home')
-  // } else {
-  //   alert(res.msg)
-  // }
-
-  // 临时测试代码：模拟登录成功
-  alert('登录成功')
-  router.push('/home')
+  // 向后端发送POST请求，传递用户名和密码
+  const res = await request.post('/user/login', user.value)
+  
+  if (res.code === 200) {
+    // 登录成功：把后端返回的用户信息保存到浏览器本地存储
+    localStorage.setItem('user', JSON.stringify(res.data))
+    // 跳转到首页
+    alert('登录成功')
+    router.push('/home')
+  } else {
+    // 登录失败：弹出后端返回的错误信息
+    alert(res.msg)
+  }
 }
 </script>
 

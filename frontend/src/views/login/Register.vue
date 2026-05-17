@@ -32,22 +32,30 @@ const router = useRouter()
 const user = ref({
   username: '',
   password: '',
-  email: ''
+  email: '',
 })
 
+// 注册方法
 const register = async () => {
-  // 等后端接口写完后，取消下面的注释
-  // const res = await request.post('/user/register', user.value)
-  // if (res.code === 200) {
-  //   alert('注册成功，请登录')
-  //   router.push('/login')
-  // } else {
-  //   alert(res.msg)
-  // }
+  // 加上 try/catch 捕获所有错误
+  try {
+    // 向后端发送POST请求，传递用户名、密码和邮箱
+    const res = await request.post('/user/register', user.value)
 
-  // 临时测试代码：模拟注册成功
-  alert('注册成功，请登录')
-  router.push('/login')
+    if (res.code === 200) {
+      // 注册成功：提示用户并跳转到登录页
+      alert('注册成功，请登录')
+      router.push('/login')
+    } else {
+      // 注册失败：弹出后端返回的错误信息
+      alert(res.msg || '注册失败，请重试')
+    }
+  } catch (error) {
+    // 关键：捕获请求错误并打印日志
+    console.error('注册请求失败:', error)
+    // 给用户明确的提示
+    alert(`请求失败: ${error.message || '请检查后端是否正常运行'}`)
+  }
 }
 </script>
 
@@ -70,7 +78,7 @@ const register = async () => {
 
 .register-box h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 30;
   color: #333;
 }
 
