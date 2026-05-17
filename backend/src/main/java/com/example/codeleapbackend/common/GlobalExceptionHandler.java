@@ -1,18 +1,102 @@
 package com.example.codeleapbackend.common;
 
+import com.example.codeleapbackend.common.Result;
+import com.example.codeleapbackend.common.ServiceException;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-// 告诉SpringBoot：这是一个全局异常处理器
+/**
+ * ControllerAdvice注解: 标识当前的类为全局异常处理器类型;可以处理由控制器抛出的异常
+ *   1.如果Controller中抛出了异常,首先看是否定义了全局异常处理器;
+ *   2.如果定义了会在全局异常处理器中找对应的异常处理方法;
+ *   3.如果找到了对应的异常处理方法,则执行异常处理方法中的代码逻辑.
+ * RestControllerAdvice注解: 复合注解,相当于 @ResponseBody + @ControllerAdvise注解
+ */
+//@ControllerAdvice
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    /*
+      ExceptionHandler注解:表示方法为具体的异常处理方法;需要一个异常处理类型的形式参数;
+      1.优先查找该控制器异常对应的异常处理方法;
+      2.如果没有对应的异常处理方法,则会找父类的异常处理方法;
+      3.如果没有父类的异常处理方法,则会走SpringMVC自己的异常处理机制;
+     */
 
-    // 捕获所有类型的异常
-    @ExceptionHandler(Exception.class)
-    public Result<String> handleException(Exception e) {
-        // 把详细错误信息打印到控制台，方便我们找bug
-        e.printStackTrace();
-        // 返回统一格式的错误结果
-        return Result.error("系统异常：" + e.getMessage());
+    /**
+     * 处理业务层异常
+     * ExceptionHandler注解：表示此方法为异常处理方法;
+     *
+     * @param ex 异常对象
+     * @return
+     */
+    @ExceptionHandler
+    public Result doHandleServiceException(ServiceException ex) {
+        //在IDEA控制台打印异常日志,如:RuntimeException:用户名已被占用
+        log.error("RuntimeException: " + ex.getStatusCode().getMsg());
+        //返回错误状态码
+        return new Result(ex.getStatusCode());
     }
+
+    /**
+     * 第1个异常处理方法:IllegalArgumentException
+     *
+     * @param ex 异常对象
+     * @return JsonResult
+     */
+    @ExceptionHandler
+    public Result doHandleIllegalArgumentException(IllegalArgumentException ex) {
+        //获取异常提示消息: ex.getMessage() [微博ID值无效]
+        String message = ex.getMessage();
+        log.error("IllegalArgumentException: " + message);
+
+        return new Result(StatusCode.OPERATION_FAILED, message);
+    }
+
+    /**
+     * 第2个异常处理方法:RuntimeException
+     *
+     * @param ex 异常处理对象
+     * @return JsonResult
+     */
+    @ExceptionHandler
+    public Result doHandleRuntimeException(RuntimeException ex) {
+        String message = ex.getMessage();
+        log.error("RuntimeException: " + message);
+
+        return new Result(StatusCode.OPERATION_FAILED, message);
+    }
+
+    /**
+     * 第3个异常处理方法:MethodArgumentNotValidException
+     * ------------专门处理POJO类型校验抛出的异常----------------
+     * 1.Spring Validation框架抛出;
+     * 2.校验POJO类属性时,参数未满足要求.
+     */
+    @ExceptionHandler
+    public Result doHandleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        //Validation中,验证POJO类型参数获取提示消息使用: ex.getFieldError().getDefaultMessage() 方法.
+        String message = ex.getFieldError().getDefaultMessage();
+        log.error("MethodArgumentNotValidException: " + message);
+
+        return new Result(StatusCode.VALIDATE_ERROR, message);
+    }
+
+    /**
+     * 第4个异常处理方法:ConstraintViolationException
+     * ------------专门处理声明参数方式验证框架校验抛出的异常----------------
+     * 1.Spring Validation框架抛出;
+     * 2.声明参数方式接收数据校验时,参数未满足要求.
+     */
+    @ExceptionHandler
+    public Result doHandleConstraintViolationException(ConstraintViolationException ex) {
+        String message = ex.getMessage().split(":")[1].trim();
+        log.error("ConstraintViolationException: " + message);
+
+        return new Result(StatusCode.VALIDATE_ERROR, message);
+    }
+
 }

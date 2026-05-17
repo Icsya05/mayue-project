@@ -1,30 +1,79 @@
-package com.example.codeleapbackend.common; // 已经自动匹配你项目的包名
+package com.example.codeleapbackend.common;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data // 自动生成getter、setter、toString方法
-public class Result<T> {
-    // 状态码：200=成功，500=失败
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Result {
+    /*
+        1.内部状态码[必须有]
+        2.状态码描述[必须有]
+        3.具体数据[可能有也可能没有]
+     */
     private Integer code;
-    // 提示信息：比如"登录成功"、"用户名不存在"
     private String msg;
-    // 返回的数据：可以是用户信息、任务列表等任何类型
-    private T data;
+    private Object data;
 
-    // 成功的静态方法：接口成功时调用这个方法返回结果
-    public static <T> Result<T> success(T data) {
-        Result<T> result = new Result<>();
-        result.setCode(200);
-        result.setMsg("成功");
-        result.setData(data);
-        return result;
+    /**
+     * 第1个构造方法：无参构造 NoArgsConstructor注解
+     */
+
+    /**
+     * 第2个构造方法：全参构造 AllArgusConstructor注解;
+     * 应用场景：需要返回具体数据的功能
+     */
+
+    /**
+     * 第3个构造方法：只有 状态码和描述;
+     * 应用场景：用于不需要返回具体数据的功能
+     */
+    public Result(Integer code, String msg) {
+        this.code = code;
+        this.msg = msg;
     }
 
-    // 失败的静态方法：接口失败时调用这个方法返回结果
-    public static <T> Result<T> error(String msg) {
-        Result<T> result = new Result<>();
-        result.setCode(500);
-        result.setMsg(msg);
-        return result;
+    /**
+     * 第4个构造方法：利用枚举类StatusCode;
+     * 应用场景：应用于没有具体数据返回的功能
+     */
+    public Result(StatusCode statusCode) {
+        this.code = statusCode.getCode();
+        this.msg = statusCode.getMsg();
+    }
+
+    /**
+     * 第5个构造方法：StatusCode和具体数据data;
+     * 应用场景：有具体数据返回的功能;
+     */
+    public Result(StatusCode statusCode, Object data){
+        this.code = statusCode.getCode();
+        this.msg = statusCode.getMsg();
+        this.data = data;
+    }
+
+    /**
+     * 第6个构造方法：用于静态方法中快速构建JsonResult对象
+     * 应用场景：所有操作成功的功能
+     */
+    public Result(Object data) {
+        this.code = StatusCode.SUCCESS.getCode();
+        this.msg = StatusCode.SUCCESS.getMsg();
+        this.data = data;
+    }
+
+    /**
+     * 定义2个静态方法,用于快速生成 JsonResult 对象
+     */
+    public static Result ok(Object data){
+        return new Result(data);
+    }
+
+    public static Result ok(){
+        return ok(null);
     }
 }
